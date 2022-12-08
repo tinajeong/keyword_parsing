@@ -6,7 +6,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.util.*;
 
 public class XlsxParser implements Parser, Runnable{
@@ -14,7 +13,7 @@ public class XlsxParser implements Parser, Runnable{
 
     private List<String> keywordList = new ArrayList<>();
 
-    private List<String> containedKeywordList = new ArrayList<>();
+    private Set<String> containedKeywordList = new HashSet<>();
 
     private XSSFWorkbook xlsxWorkbook;
 
@@ -35,7 +34,8 @@ public class XlsxParser implements Parser, Runnable{
     @Override
     public void readKeywords() {
         try {
-            try (FileInputStream file = new FileInputStream((new File(ClassLoader.getSystemResource(fileName).toURI())))) {
+            try (InputStream file = XlsxParser.class.getClassLoader().getResourceAsStream(fileName)) {
+
                 xlsxWorkbook = new XSSFWorkbook(file);
 
                 XSSFSheet keywordSheet = xlsxWorkbook.getSheet("키워드");
@@ -56,8 +56,6 @@ public class XlsxParser implements Parser, Runnable{
                         }
                     }
                 }
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -90,7 +88,6 @@ public class XlsxParser implements Parser, Runnable{
                             containedKeywordList.add(keyword);
                         }
                     }
-//                    containedKeywordList.add(keywordList.stream().filter(word::contains).findFirst().get());
             }
         }
     }
